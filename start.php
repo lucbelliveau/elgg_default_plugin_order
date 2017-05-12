@@ -1,19 +1,42 @@
 <?php
 
-function elgg_default_plugin_order(){
-	elgg_default_plugin_order_reorder();
-	elgg_default_plugin_order_set_status();
-	if(is_plugin_enabled('elgg_default_plugin_order')){
-		disable_plugin('elgg_default_plugin_order');
-	}
+elgg_register_event_handler('init', 'system', 'plugin_order_init');
 
+function plugin_order_init() {
+    elgg_register_action(
+      'admin/plugin_loader/import',
+      dirname(__FILE__) . '/actions/import.php',
+      'admin'
+    );
+    elgg_register_action(
+      'admin/plugin_loader/export',
+      dirname(__FILE__) . '/actions/export.php',
+      'admin'
+    );
+    elgg_register_admin_menu_item(
+      'configure',
+      'plugin_order',
+      'configure_utilities'
+    );
+}
+
+function elgg_default_plugin_order_export_config() {
+  $plugins = elgg_get_plugins('all');
+  $config_file = elgg_get_config('path')."plugin_config.ini";
+  $data =
+    "# GCconnex plugin order.\n".
+    "# See mod/elgg_default_plugin_order/start.php\n\n";
+  foreach ($plugins as $plugin) {
+    $enabled = (is_plugin_enabled($plugin->title)) ? 'enabled' : 'disabled';
+    $data .= "{$plugin->title}={$enabled}\n";
+  }
+  return file_put_contents($config_file, $data);
 }
 
 function elgg_default_plugin_order_load_config(){
 	$config_settings = array();
 	$config_file = elgg_get_config('path')."plugin_config.ini";
 	if(file_exists($config_file)){
-	   //TODO Add sussport for sections to handle diferent environments
 	   $config_settings = parse_ini_file($config_file);
 	}
 	$config_hash = md5(serialize($config_settings));
@@ -23,8 +46,6 @@ function elgg_default_plugin_order_load_config(){
 		return $config_settings;
 	}
 	return $config_settings;
-	// TODO Verify problem with cache handling
-	//return array();	
 }
 function elgg_default_plugin_order_reorder(){
 	$final_order = array();
@@ -38,7 +59,7 @@ function elgg_default_plugin_order_reorder(){
 		regenerate_plugin_list($final_order);
 		elgg_filepath_cache_reset();
 	}
-	
+
 }
 function elgg_default_plugin_order_set_status(){
 	$config_settings = elgg_default_plugin_order_load_config();
