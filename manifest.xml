@@ -6,7 +6,7 @@
 	<category>management</category>
 	<category>development</category>
 	<description>Allows to configure default plugin order for ensure the same configuration order on devel and production environments</description>
-	<copyright>Luc Belliveau</copyright>
+	<copyright>National Research Council</copyright>
 	<license>MIT</license>
 	<website>https://github.com/lucbelliveau/plugin_loader</website>
 	<requires>
