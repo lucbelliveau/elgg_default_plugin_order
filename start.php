@@ -20,12 +20,10 @@ function plugin_order_init() {
     );
 }
 
-function elgg_default_plugin_order_export_config() {
+function plugin_loader_export_config() {
   $plugins = elgg_get_plugins('all');
   $config_file = elgg_get_config('path')."plugin_config.ini";
-  $data =
-    "# GCconnex plugin order.\n".
-    "# See mod/elgg_default_plugin_order/start.php\n\n";
+  $data = "# Plugin order generated ".date('Y-m-d H:m:s')."\n";
   foreach ($plugins as $plugin) {
     $enabled = (is_plugin_enabled($plugin->title)) ? 'enabled' : 'disabled';
     $data .= "{$plugin->title}={$enabled}\n";
@@ -33,24 +31,24 @@ function elgg_default_plugin_order_export_config() {
   return file_put_contents($config_file, $data);
 }
 
-function elgg_default_plugin_order_load_config(){
+function plugin_loader_load_config(){
 	$config_settings = array();
 	$config_file = elgg_get_config('path')."plugin_config.ini";
 	if(file_exists($config_file)){
 	   $config_settings = parse_ini_file($config_file);
 	}
 	$config_hash = md5(serialize($config_settings));
-	$old_config = get_plugin_setting('config','elgg_default_plugin_order');
+	$old_config = get_plugin_setting('config','plugin_loader');
 	if($old_config != $config_hash){
-		set_plugin_setting('config',$config_hash,'elgg_default_plugin_order');
+		set_plugin_setting('config',$config_hash,'plugin_loader');
 		return $config_settings;
 	}
 	return $config_settings;
 }
-function elgg_default_plugin_order_reorder(){
+function plugin_loader_reorder(){
 	$final_order = array();
 	$sequence = 10;
-	$config_settings = elgg_default_plugin_order_load_config();
+	$config_settings = plugin_loader_load_config();
 	if(!empty($config_settings)){
 		foreach($config_settings as $plugin => $status){
 			$final_order[$sequence] = $plugin;
@@ -61,8 +59,8 @@ function elgg_default_plugin_order_reorder(){
 	}
 
 }
-function elgg_default_plugin_order_set_status(){
-	$config_settings = elgg_default_plugin_order_load_config();
+function plugin_loader_set_status(){
+	$config_settings = plugin_loader_load_config();
 	if(!empty($config_settings)){
 		foreach($config_settings as $plugin => $status){
 			switch($status){
@@ -83,6 +81,6 @@ function elgg_default_plugin_order_set_status(){
 }
 
 
-register_elgg_event_handler('init','system','elgg_default_plugin_order');
+register_elgg_event_handler('init','system','plugin_loader');
 
 ?>
